@@ -8,7 +8,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://kusonekochan:YOUR_PASSWORD@dpg-cp5vsoo21fec73ecvc5g-a.singapore-postgres.render.com:5432/suika',
+  connectionString: process.env.DATABASE_URL || 'postgres://kusonekochan:gJONrWmTJmoq2x46pTd5xOOxc8KytPJB@dpg-cp5vsoo21fec73ecvc5g-a.singapore-postgres.render.com:5432/suika',
   ssl: {
     rejectUnauthorized: false
   }
