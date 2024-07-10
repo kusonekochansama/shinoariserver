@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
 
-console.log('Database URL:', process.env.DATABASE_URL); // 追加: 環境変数の値をログに出力
+console.log('Database URL:', process.env.DATABASE_URL);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -28,7 +28,7 @@ app.get('/highscores', async (req, res) => {
     const result = await pool.query('SELECT * FROM highscores ORDER BY score DESC LIMIT 3');
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching high scores:', err); // 詳細なエラーログを追加
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -39,7 +39,7 @@ app.post('/highscores', async (req, res) => {
     const result = await pool.query('INSERT INTO highscores (name, score) VALUES ($1, $2) RETURNING *', [name, score]);
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    console.error('Error saving high score:', err); // 詳細なエラーログを追加
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
