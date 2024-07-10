@@ -1,42 +1,28 @@
-const express = require('express');
-const bodyParser = require('body-parser');
 const { Pool } = require('pg');
-const cors = require('cors');
-
-const app = express();
-const port = process.env.PORT || 3000;
+require('dotenv').config();
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
-app.use(cors());
-app.use(bodyParser.json());
-
-app.get('/highscores', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM highscores ORDER BY score DESC LIMIT 10');
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch high scores' });
-  }
+pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+        console.error('Database connection error:', err.stack);
+    } else {
+        console.log('Database connection successful:', res.rows);
+    }
+    pool.end();
 });
 
-app.post('/highscores', async (req, res) => {
-  const { name, score } = req.body;
-  try {
-    await pool.query('INSERT INTO highscores (name, score) VALUES ($1, $2)', [name, score]);
-    res.status(201).json({ message: 'High score saved' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to save high score' });
-  }
-});
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 10000;
+
+app.use(express.json());
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });
