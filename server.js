@@ -1,31 +1,42 @@
-const { Pool } = require('pg');
 const express = require('express');
-const fs = require('fs');
+const bodyParser = require('body-parser');
+const { Pool } = require('pg');
+const cors = require('cors');
+
 const app = express();
-const PORT = process.env.PORT || 10000;
+const port = process.env.PORT || 3000;
 
-// DATABASE_URL を使ってプールを作成
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL, // ここでDATABASE_URLを使用
-    ssl: {
-        rejectUnauthorized: true,
-        ca: fs.readFileSync('combined-certificates.crt').toString(),
-    },
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
-pool.connect((err, client, release) => {
-    if (err) {
-        console.error('Database connection error:', err.stack);
-        return;
-    }
-    console.log('Database connected successfully');
-    release();
+app.use(cors());
+app.use(bodyParser.json());
+
+app.get('/highscores', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM highscores ORDER BY score DESC LIMIT 10');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch high scores' });
+  }
 });
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
+app.post('/highscores', async (req, res) => {
+  const { name, score } = req.body;
+  try {
+    await pool.query('INSERT INTO highscores (name, score) VALUES ($1, $2)', [name, score]);
+    res.status(201).json({ message: 'High score saved' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to save high score' });
+  }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
