@@ -4,11 +4,13 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+const path = require('path');
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: true,
-        ca: fs.readFileSync('combined-certificates.crt').toString(),
+        ca: fs.readFileSync(path.join(__dirname, 'combined-certificates.crt')).toString(),
     },
 });
 
