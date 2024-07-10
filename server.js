@@ -1,28 +1,30 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+const express = require('express');
+const fs = require('fs');
+const app = express();
+const PORT = process.env.PORT || 10000;
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false // SSLを有効にして、自己署名証明書を受け入れる
-    }
+        rejectUnauthorized: true,
+        ca: fs.readFileSync('combined-certificates.crt').toString(),
+    },
 });
 
-pool.query('SELECT NOW()', (err, res) => {
+pool.connect((err, client, release) => {
     if (err) {
         console.error('Database connection error:', err.stack);
-    } else {
-        console.log('Database connection successful:', res.rows);
+        return;
     }
-    pool.end();
+    console.log('Database connected successfully');
+    release();
 });
 
-const express = require('express');
-const app = express();
-const port = process.env.PORT || 10000;
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
 
-app.use(express.json());
-
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
