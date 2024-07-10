@@ -3,7 +3,9 @@ require('dotenv').config();
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: false // SSLを無効にしてみる
+    ssl: {
+        rejectUnauthorized: false // SSLを有効にして、自己署名証明書を受け入れる
+    }
 });
 
 pool.query('SELECT NOW()', (err, res) => {
