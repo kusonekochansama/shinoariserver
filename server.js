@@ -4,26 +4,22 @@ const { Pool } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
 
-let pool;
+console.log('Database URL:', process.env.DATABASE_URL); // 追加: 環境変数の値をログに出力
 
-const connectWithRetry = () => {
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false
-    },
-    connectionTimeoutMillis: 5000, // 5秒のタイムアウト
-    idleTimeoutMillis: 30000, // 30秒のアイドルタイムアウト
-    max: 20 // 最大接続数
-  });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  },
+  connectionTimeoutMillis: 5000, // 5秒のタイムアウト
+  idleTimeoutMillis: 30000, // 30秒のアイドルタイムアウト
+  max: 20 // 最大接続数
+});
 
-  pool.on('error', (err, client) => {
-    console.error('Unexpected error on idle client', err);
-    setTimeout(connectWithRetry, 5000); // 5秒後に再試行
-  });
-};
-
-connectWithRetry();
+pool.on('error', (err, client) => {
+  console.error('Unexpected error on idle client', err);
+  process.exit(-1);
+});
 
 app.use(bodyParser.json());
 
