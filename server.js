@@ -1,14 +1,14 @@
 const { Pool } = require('pg');
 const express = require('express');
 const fs = require('fs');
-const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false, // 一時的に検証を無効化
+        rejectUnauthorized: true,
+        ca: fs.readFileSync('combined-certificates.crt').toString(),
     },
 });
 
@@ -19,6 +19,10 @@ pool.connect((err, client, release) => {
     }
     console.log('Database connected successfully');
     release();
+});
+
+app.get('/', (req, res) => {
+    res.send('Hello, world!');
 });
 
 app.listen(PORT, () => {
