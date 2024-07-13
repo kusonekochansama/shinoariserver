@@ -14,9 +14,10 @@ app.use(express.json());  // JSONボディのパース用ミドルウェア
 
 // データベース接続設定
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL + '?sslmode=require', // SSLモードをrequireに設定
+    connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false,
+        rejectUnauthorized: true,
+        ca: fs.readFileSync(__dirname + '/combined-certificates.crt').toString(), // 証明書ファイルを読み込む
     },
 });
 
