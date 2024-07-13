@@ -13,7 +13,7 @@ app.use(cors({
 app.use(express.json());  // JSONボディのパース用ミドルウェア
 
 const pool = new Pool({
-    connectionString: process.env.postgresql://kusonekochan:bX3UBVekLqRQLZ50kO1rcZtPxaUOhloa@dpg-cq7k3vrv2p9s73c5os2g-a.singapore-postgres.render.com/anycolor,
+    connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: true,
         ca: fs.readFileSync(__dirname + '/combined-certificates.crt').toString(), // 証明書ファイルを読み込む
