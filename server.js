@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 const express = require('express');
 const fs = require('fs');
-const cors = require('cors');
+const cors = require('cors'); // CORSミドルウェアを追加
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -16,7 +16,7 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: true,
-        ca: fs.readFileSync('ca-certificate-chain.crt').toString(),
+        ca: fs.readFileSync('combined-certificates.crt').toString(), // 証明書ファイルを読み込む
     },
 });
 
