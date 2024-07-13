@@ -16,7 +16,7 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: true,
-        ca: fs.readFileSync(__dirname + '/ca-certificate-chain.crt').toString(), // 証明書ファイルを読み込む
+        ca: fs.readFileSync(__dirname + '/combined-certificates.crt').toString(), // 証明書ファイルを読み込む
     },
 });
 
