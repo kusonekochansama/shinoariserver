@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 const express = require('express');
 const fs = require('fs');
-const cors = require('cors'); // 追加
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -45,4 +45,17 @@ app.get('/highscores', async (req, res) => {
 });
 
 // ハイスコアの保存エンドポイント
-app.post('/highscores
+app.post('/highscores', async (req, res) => {
+    const { name, score } = req.body;
+    try {
+        const result = await pool.query('INSERT INTO highscores (name, score) VALUES ($1, $2) RETURNING *', [name, score]);
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error saving highscore', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
