@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 const express = require('express');
 const fs = require('fs');
-const cors = require('cors');
+const cors = require('cors'); // CORSミドルウェアを追加
 const app = express();
 const PORT = process.env.PORT || 10000;
 
