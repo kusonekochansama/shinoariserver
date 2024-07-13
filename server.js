@@ -1,23 +1,21 @@
 const { Pool } = require('pg');
 const express = require('express');
 const fs = require('fs');
-const cors = require('cors'); // CORSミドルウェアを追加
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// CORSミドルウェアを使用
 app.use(cors({
-    origin: 'http://nyandaru.starfree.jp' // 必要に応じて適切なオリジンを指定
+    origin: 'http://nyandaru.starfree.jp'
 }));
 
-app.use(express.json());  // JSONボディのパース用ミドルウェア
+app.use(express.json());
 
-// データベース接続設定
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: true,
-        ca: fs.readFileSync(__dirname + '/combined-certificates.crt').toString(), // 証明書ファイルを読み込む
+        ca: fs.readFileSync(__dirname + '/combined-certificates.crt').toString(),
     },
 });
 
@@ -34,7 +32,6 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-// ハイスコアの取得エンドポイント
 app.get('/highscores', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM highscores ORDER BY score DESC LIMIT 10');
@@ -45,7 +42,6 @@ app.get('/highscores', async (req, res) => {
     }
 });
 
-// ハイスコアの保存エンドポイント
 app.post('/highscores', async (req, res) => {
     const { name, score } = req.body;
     try {
