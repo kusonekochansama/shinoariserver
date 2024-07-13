@@ -14,10 +14,9 @@ app.use(express.json());  // JSONボディのパース用ミドルウェア
 
 // データベース接続設定
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgresql://kusonekochan:bX3UBVekLqRQLZ50kO1rcZtPxaUOhloa@dpg-cq7k3vrv2p9s73c5os2g-a.singapore-postgres.render.com/anycolor',
+    connectionString: process.env.DATABASE_URL + '?sslmode=require', // SSLモードをrequireに設定
     ssl: {
-        rejectUnauthorized: true,
-        ca: fs.readFileSync(__dirname + '/combined-certificates.crt').toString(), // 証明書ファイルを読み込む
+        rejectUnauthorized: false,
     },
 });
 
