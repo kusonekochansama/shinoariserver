@@ -16,7 +16,7 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: true,
-        ca: fs.readFileSync('combined-certificates.crt').toString(),
+        ca: fs.readFileSync('ca-certificate-chain.crt').toString(), // アップロードした証明書ファイルを読み込む
     },
 });
 
@@ -45,17 +45,4 @@ app.get('/highscores', async (req, res) => {
 });
 
 // ハイスコアの保存エンドポイント
-app.post('/highscores', async (req, res) => {
-    const { name, score } = req.body;
-    try {
-        const result = await pool.query('INSERT INTO highscores (name, score) VALUES ($1, $2) RETURNING *', [name, score]);
-        res.json(result.rows[0]);
-    } catch (err) {
-        console.error('Error saving highscore', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.post('/highscores
