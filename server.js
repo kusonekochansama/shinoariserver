@@ -1,49 +1,61 @@
-const express = require('express');
-const bodyParser = require('body-parser');
 const { Pool } = require('pg');
+const express = require('express');
+const fs = require('fs');
+const cors = require('cors'); // 追加
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
-console.log('Database URL:', process.env.DATABASE_URL);
+// CORSミドルウェアを使用
+app.use(cors({
+    origin: 'http://nyandaru.starfree.jp' // 必要に応じて適切なオリジンを指定
+}));
+
+app.use(express.json());  // JSONボディのパース用ミドルウェア
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  },
-  connectionTimeoutMillis: 5000, // 5秒のタイムアウト
-  idleTimeoutMillis: 30000, // 30秒のアイドルタイムアウト
-  max: 20 // 最大接続数
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: true,
+        ca: fs.readFileSync('combined-certificates.crt').toString(),
+    },
 });
 
-pool.on('error', (err, client) => {
-  console.error('Unexpected error on idle client', err);
-  process.exit(-1);
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('Database connection error:', err.stack);
+        return;
+    }
+    console.log('Database connected successfully');
+    release();
 });
 
-app.use(bodyParser.json());
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
 
+// ハイスコアの取得エンドポイント
 app.get('/highscores', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM highscores ORDER BY score DESC LIMIT 3');
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error fetching high scores:', err); // 詳細なエラーログを追加
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+    try {
+        const result = await pool.query('SELECT * FROM highscores ORDER BY score DESC LIMIT 10');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error retrieving highscores', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
+// ハイスコアの保存エンドポイント
 app.post('/highscores', async (req, res) => {
-  const { name, score } = req.body;
-  try {
-    const result = await pool.query('INSERT INTO highscores (name, score) VALUES ($1, $2) RETURNING *', [name, score]);
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error('Error saving high score:', err); // 詳細なエラーログを追加
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+    const { name, score } = req.body;
+    try {
+        const result = await pool.query('INSERT INTO highscores (name, score) VALUES ($1, $2) RETURNING *', [name, score]);
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error saving highscore', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
