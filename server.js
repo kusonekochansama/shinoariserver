@@ -5,8 +5,9 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-app.use(cors({
-    origin: 'http://nyandaru.starfree.jp'
+const allowedOrigins = [
+    'http://nyandaru.starfree.jp',
+    'http://gameru.girly.jp/', // 他のオリジンを追加
 }));
 
 app.use(express.json());
