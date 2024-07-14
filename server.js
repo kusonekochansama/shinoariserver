@@ -1,23 +1,31 @@
+require('dotenv').config();
 const { Pool } = require('pg');
 const express = require('express');
-const fs = require('fs');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-const allowedOrigins = [
-    'http://nyandaru.starfree.jp',
-    'http://gameru.girly.jp/', // 他のオリジンを追加
+// 環境変数から許可するオリジンを取得
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
+
+app.use(cors({
+    origin: function(origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
 }));
 
 app.use(express.json());
 
+// PostgreSQLデータベースへの接続設定
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: 'postgresql://kusonekochan:gJONrWmTJmoq2x46pTd5xOOxc8KytPJB@dpg-cp5vsoo21fec73ecvc5g-a.singapore-postgres.render.com/suika',
     ssl: {
-        rejectUnauthorized: true,
-        ca: fs.readFileSync(__dirname + '/combined-certificates.crt').toString(),
-    },
+        rejectUnauthorized: false
+    }
 });
 
 pool.connect((err, client, release) => {
@@ -29,10 +37,7 @@ pool.connect((err, client, release) => {
     release();
 });
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
-
+// ハイスコアの取得エンドポイント
 app.get('/highscores', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM highscores ORDER BY score DESC LIMIT 10');
@@ -43,6 +48,7 @@ app.get('/highscores', async (req, res) => {
     }
 });
 
+// ハイスコアの保存エンドポイント
 app.post('/highscores', async (req, res) => {
     const { name, score } = req.body;
     try {
