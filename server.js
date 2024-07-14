@@ -22,7 +22,7 @@ app.use(express.json());
 
 // PostgreSQLデータベースへの接続設定
 const pool = new Pool({
-    connectionString: 'postgresql://kusonekochan:gJONrWmTJmoq2x46pTd5xOOxc8KytPJB@dpg-cp5vsoo21fec73ecvc5g-a.singapore-postgres.render.com/suika',
+    connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: false
     }
